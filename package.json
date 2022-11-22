@@ -11,5 +11,14 @@
     "watchable"
   ],
   "author": "Melvin Doucet <melv.douc@gmail.com>",
+  "homepage": "https://github.com/MelvDouc/melv_observable#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MelvDouc/melv_observable.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MelvDouc/melv_observable/issues",
+    "email": "melv.douc@gmail.com"
+  },
   "license": "ISC"
 }
