@@ -1,0 +1,15 @@
+{
+  "name": "melv_observable",
+  "version": "1.0.0",
+  "description": "A class containing a private value and a set of functions to run whenever the value is updated.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p src"
+  },
+  "keywords": [
+    "observable",
+    "watchable"
+  ],
+  "author": "Melvin Doucet <melv.douc@gmail.com>",
+  "license": "ISC"
+}
