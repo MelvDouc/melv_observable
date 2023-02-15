@@ -1,3 +1,1 @@
-import Observable from "./Observable.js";
-
-export default Observable;
+export { default as Observable } from "./Observable.js";

@@ -1,10 +1,12 @@
 {
   "name": "melv_observable",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A class containing a private value and a set of functions to run whenever the value is updated.",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
-    "build": "tsc -p src"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "observable",
@@ -20,5 +22,8 @@
     "url": "https://github.com/MelvDouc/melv_observable/issues",
     "email": "melv.douc@gmail.com"
   },
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  }
 }
