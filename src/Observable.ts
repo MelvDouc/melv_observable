@@ -1,65 +1,49 @@
-export default class Observable<T> {
-  private value: T;
-  private subscriptions = new Set<(value: T) => void>();
+export class Observable<TObsValue> {
+  private _value: TObsValue;
+  private _subscriptions = new Set<ObservableSubscription<TObsValue>>();
 
-  constructor(value?: T) {
+  constructor(value?: TObsValue) {
     if (value !== undefined)
-      this.value = value;
+      this._value = value;
   }
 
   /**
    * Get the private value stored in this instance.
    */
-  public getValue(): T {
-    return this.value;
+  public get value(): TObsValue {
+    return this._value;
   }
 
   /**
    * Change this instance's value with an expression and notify subscribers.
    */
-  public setValue(newValue: T, allowNotification = true): this {
-    this.value = newValue;
-    return allowNotification ? this.notify() : this;
+  public set value(newValue: TObsValue) {
+    this._value = newValue;
+    this.notify();
   }
 
   /**
-   * Change this instance's value with a function that takes in the current value and notify subscribers.
+   * Run a function whenever the value stored in this instance is reassigned.
    */
-  public updateValue(updater: (value: T) => T, allowNotification = true): this {
-    this.value = updater(this.value);
-    return allowNotification ? this.notify() : this;
+  public subscribe(subscription: ObservableSubscription<TObsValue>): VoidFunction {
+    this._subscriptions.add(subscription);
+    return () => this._subscriptions.delete(subscription);
   }
 
   /**
-   * Execute a function whenever this instance's value changes.
-   * @param subscription The function to run.
-   * @param onUnsubscribe An optional function to run after unsubscribing.
-   * @returns A function that will remove the subscription.
+   * Map the value of this instance on to that of another observable.
    */
-  public subscribe(subscription: (value: T) => void, onUnsubscribe?: (value: T) => void): () => void {
-    this.subscriptions.add(subscription);
-
-    return () => {
-      this.subscriptions.delete(subscription);
-      onUnsubscribe && onUnsubscribe(this.value);
-    };
-  }
-
-  /**
-   * Map this instance's value onto that of another observable.
-   * @param observable The observable to follow.
-   * @param mapFn A function that takes in the other observable's value and return a value of the type of this instance.
-   */
-  public followObservable<O>(observable: Observable<O>, mapFn: (value: O) => T): this {
-    observable.subscribe((value) => this.setValue(mapFn(value)));
-    return this;
+  public map<TOtherObsValue>(otherObs: Observable<TOtherObsValue>, mapFn: (value: TOtherObsValue) => TObsValue): void {
+    this.value = mapFn(otherObs.value);
+    otherObs.subscribe((value) => this.value = mapFn(value));
   }
 
   /**
    * Execute every subscription function that was added to this instance via `subscribe`.
    */
-  public notify(): this {
-    this.subscriptions.forEach((subscription) => subscription(this.value));
-    return this;
+  public notify(): void {
+    this._subscriptions.forEach((subscription) => subscription(this._value));
   }
 }
+
+export type ObservableSubscription<TObsValue> = (value: TObsValue) => void;
