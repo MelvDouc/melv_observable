@@ -1,49 +1,54 @@
-export class Observable<TObsValue> {
-  private _value: TObsValue;
-  private _subscriptions = new Set<ObservableSubscription<TObsValue>>();
+import { ObservableSubscription } from "./types.js";
 
-  constructor(value?: TObsValue) {
+export class Observable<T> {
+  #value: T;
+  readonly #subscriptions = new Set<ObservableSubscription<T>>();
+
+  constructor(value?: T) {
     if (value !== undefined)
-      this._value = value;
+      this.#value = value;
   }
 
   /**
    * Get the private value stored in this instance.
    */
-  public get value(): TObsValue {
-    return this._value;
+  public get value(): T {
+    return this.#value;
   }
 
   /**
    * Change this instance's value with an expression and notify subscribers.
    */
-  public set value(newValue: TObsValue) {
-    this._value = newValue;
+  public set value(newValue: T) {
+    this.#value = newValue;
     this.notify();
   }
 
   /**
    * Run a function whenever the value stored in this instance is reassigned.
+   * @param subscription The function to run.
+   * @returns An unsubscribe function.
    */
-  public subscribe(subscription: ObservableSubscription<TObsValue>): VoidFunction {
-    this._subscriptions.add(subscription);
-    return () => this._subscriptions.delete(subscription);
+  public subscribe(subscription: ObservableSubscription<T>): VoidFunction {
+    this.#subscriptions.add(subscription);
+    return () => this.#subscriptions.delete(subscription);
   }
 
   /**
-   * Map the value of this instance on to that of another observable.
+   * Create a new observable whose value is mapped on to that of this instance.
+   * @param mapFn A function to convert this instance's value into that of the returned observable.
+   * @returns The mapped observable.
    */
-  public map<TOtherObsValue>(otherObs: Observable<TOtherObsValue>, mapFn: (value: TOtherObsValue) => TObsValue): void {
-    this.value = mapFn(otherObs.value);
-    otherObs.subscribe((value) => this.value = mapFn(value));
+  public map<TOtherObsValue>(mapFn: (value: T) => TOtherObsValue): Observable<TOtherObsValue> {
+    const obs = new Observable(mapFn(this.#value));
+    this.subscribe((value) => obs.value = mapFn(value));
+    return obs;
   }
 
   /**
    * Execute every subscription function that was added to this instance via `subscribe`.
    */
   public notify(): void {
-    this._subscriptions.forEach((subscription) => subscription(this._value));
+    this.#subscriptions.forEach((subscription) => subscription(this.#value));
   }
 }
-
-export type ObservableSubscription<TObsValue> = (value: TObsValue) => void;
